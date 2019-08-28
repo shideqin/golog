@@ -10,23 +10,36 @@ import (
 )
 
 const (
+	//LevelDebug debug
 	LevelDebug = iota
+	//LevelInfo info
 	LevelInfo
+	//LevelWarn warn
 	LevelWarn
+	//LevelError error
 	LevelError
+	//LevelOff off
 	LevelOff
 )
 
 const (
-	Ldate         = 1 << iota     //日期示例： 2009/01/23
-	Ltime                         //时间示例: 01:23:23
-	Lmicroseconds                 //毫秒示例: 01:23:23.123123
-	Llongfile                     //绝对路径和行号: /a/b/c/d.go:23
-	Lshortfile                    //文件和行号: d.go:23
-	LUTC                          //日期时间转为0时区的
-	LstdFlags     = Ldate | Ltime //Go提供的标准抬头信息
+	//Ldate 日期示例：2009/01/23
+	Ldate = 1 << iota
+	//Ltime 时间示例: 01:23:23
+	Ltime
+	//Lmicroseconds 毫秒示例: 01:23:23.123123
+	Lmicroseconds
+	//Llongfile 绝对路径和行号: /a/b/c/d.go:23
+	Llongfile
+	//Lshortfile 文件和行号: d.go:23
+	Lshortfile
+	//LUTC 日期时间转为0时区的
+	LUTC
+	//LstdFlags Go提供的标准抬头信息
+	LstdFlags = Ldate | Ltime
 )
 
+//Logger 结构体
 type Logger struct {
 	dirname string
 	format  string
@@ -35,6 +48,7 @@ type Logger struct {
 	logger  *log.Logger
 }
 
+//NewLogger 实例化
 func NewLogger(options map[string]interface{}) *Logger {
 	var dirname = "."
 	if v, ok := options["dirname"].(string); ok && v != "" {
@@ -62,14 +76,17 @@ func NewLogger(options map[string]interface{}) *Logger {
 	}
 }
 
+//SetLevel 设置级别
 func (l *Logger) SetLevel(level int) {
 	l.level = level
 }
 
+//SetFlags 标准抬头信息
 func (l *Logger) SetFlags(flag int) {
 	l.logger.SetFlags(flag)
 }
 
+//Debug debug日志输出
 func (l *Logger) Debug(v ...interface{}) {
 	if l.level <= LevelDebug {
 		l.logger.SetPrefix("[Debug] ")
@@ -77,6 +94,7 @@ func (l *Logger) Debug(v ...interface{}) {
 	}
 }
 
+//Info info日志输出
 func (l *Logger) Info(v ...interface{}) {
 	if l.level <= LevelInfo {
 		l.logger.SetPrefix("[Info] ")
@@ -84,6 +102,7 @@ func (l *Logger) Info(v ...interface{}) {
 	}
 }
 
+//Warn warn日志输出
 func (l *Logger) Warn(v ...interface{}) {
 	if l.level <= LevelWarn {
 		l.logger.SetPrefix("[Warn] ")
@@ -91,6 +110,7 @@ func (l *Logger) Warn(v ...interface{}) {
 	}
 }
 
+//Error error日志输出
 func (l *Logger) Error(v ...interface{}) {
 	if l.level <= LevelError {
 		l.logger.SetPrefix("[Error] ")
@@ -98,6 +118,7 @@ func (l *Logger) Error(v ...interface{}) {
 	}
 }
 
+//Debugf debug格式化日志输出
 func (l *Logger) Debugf(format string, v ...interface{}) {
 	if l.level <= LevelDebug {
 		l.logger.SetPrefix("[Debug] ")
@@ -105,6 +126,7 @@ func (l *Logger) Debugf(format string, v ...interface{}) {
 	}
 }
 
+//Infof info格式化日志输出
 func (l *Logger) Infof(format string, v ...interface{}) {
 	if l.level <= LevelInfo {
 		l.logger.SetPrefix("[Info] ")
@@ -112,6 +134,7 @@ func (l *Logger) Infof(format string, v ...interface{}) {
 	}
 }
 
+//Warnf warn格式化日志输出
 func (l *Logger) Warnf(format string, v ...interface{}) {
 	if l.level <= LevelWarn {
 		l.logger.SetPrefix("[Warn] ")
@@ -119,6 +142,7 @@ func (l *Logger) Warnf(format string, v ...interface{}) {
 	}
 }
 
+//Errorf error格式化日志输出
 func (l *Logger) Errorf(format string, v ...interface{}) {
 	if l.level <= LevelError {
 		l.logger.SetPrefix("[Error] ")
@@ -126,6 +150,7 @@ func (l *Logger) Errorf(format string, v ...interface{}) {
 	}
 }
 
+//writeLog 写日志操作
 func (l *Logger) writeLog(format string, v ...interface{}) {
 	if l.output == "file" {
 		localfile := strings.TrimRight(l.dirname, "/") + "/" + time.Now().Format(l.getFormat()) + ".log"
@@ -152,6 +177,7 @@ func (l *Logger) writeLog(format string, v ...interface{}) {
 	l.logger.Output(3, o)
 }
 
+//getFormat 日志文件名格式化
 func (l *Logger) getFormat() string {
 	format := l.format
 	format = strings.Replace(format, "yyyy", "2006", -1)
