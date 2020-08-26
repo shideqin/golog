@@ -19,24 +19,7 @@ const (
 	//LevelError error
 	LevelError
 	//LevelOff off
-	LevelOff
-)
-
-const (
-	//Ldate 日期示例：2009/01/23
-	Ldate = 1 << iota
-	//Ltime 时间示例: 01:23:23
-	Ltime
-	//Lmicroseconds 毫秒示例: 01:23:23.123123
-	Lmicroseconds
-	//Llongfile 绝对路径和行号: /a/b/c/d.go:23
-	Llongfile
-	//Lshortfile 文件和行号: d.go:23
-	Lshortfile
-	//LUTC 日期时间转为0时区的
-	LUTC
-	//LstdFlags Go提供的标准抬头信息
-	LstdFlags = Ldate | Ltime
+	//LevelOff
 )
 
 //Logger 结构体
@@ -46,6 +29,7 @@ type Logger struct {
 	output  string
 	level   int
 	logger  *log.Logger
+	logChan chan string
 }
 
 //NewLogger 实例化
@@ -79,6 +63,11 @@ func NewLogger(options map[string]interface{}) *Logger {
 //SetLevel 设置级别
 func (l *Logger) SetLevel(level int) {
 	l.level = level
+}
+
+//SetChan 设置log输出通道
+func (l *Logger) SetChan(c chan string) {
+	l.logChan = c
 }
 
 //SetFlags 标准抬头信息
@@ -152,29 +141,32 @@ func (l *Logger) Errorf(format string, v ...interface{}) {
 
 //writeLog 写日志操作
 func (l *Logger) writeLog(format string, v ...interface{}) {
-	if l.output == "file" {
-		localfile := strings.TrimRight(l.dirname, "/") + "/" + time.Now().Format(l.getFormat()) + ".log"
-		localdir := path.Dir(localfile)
-		err := os.MkdirAll(localdir, 0666)
-		if err != nil {
-			log.Printf("%v\n", err)
-			return
-		}
-		file, err := os.OpenFile(localfile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		defer file.Close()
-		if err != nil {
-			log.Printf("%v\n", err)
-			return
-		}
-		l.logger.SetOutput(file)
-	}
 	o := ""
 	if format == "" {
 		o = fmt.Sprintln(v...)
 	} else {
 		o = fmt.Sprintf(format, v...)
 	}
-	l.logger.Output(3, o)
+	go func() {
+		l.logChan <- o
+	}()
+	if l.output == "file" {
+		localFile := strings.TrimRight(l.dirname, "/") + "/" + time.Now().Format(l.getFormat()) + ".log"
+		localDir := path.Dir(localFile)
+		err := os.MkdirAll(localDir, 0666)
+		if err != nil {
+			log.Printf("%v\n", err)
+			return
+		}
+		file, err := os.OpenFile(localFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			log.Printf("%v\n", err)
+			return
+		}
+		defer file.Close()
+		l.logger.SetOutput(file)
+	}
+	_ = l.logger.Output(3, o)
 }
 
 //getFormat 日志文件名格式化
