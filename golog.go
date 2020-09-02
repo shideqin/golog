@@ -24,12 +24,13 @@ const (
 
 //Logger 结构体
 type Logger struct {
-	dirname string
-	format  string
-	output  string
-	level   int
-	logger  *log.Logger
-	logChan chan string
+	dirname     string
+	format      string
+	output      string
+	level       int
+	logger      *log.Logger
+	logChan     chan string
+	logChanStat bool
 }
 
 //NewLogger 实例化
@@ -67,6 +68,7 @@ func (l *Logger) SetLevel(level int) {
 
 //SetChan 设置log输出通道
 func (l *Logger) SetChan(c chan string) {
+	l.logChanStat = true
 	l.logChan = c
 }
 
@@ -148,6 +150,9 @@ func (l *Logger) writeLog(format string, v ...interface{}) {
 		o = fmt.Sprintf(format, v...)
 	}
 	go func() {
+		if !l.logChanStat {
+			return
+		}
 		l.logChan <- o
 	}()
 	if l.output == "file" {
