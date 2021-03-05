@@ -72,6 +72,11 @@ func (l *Logger) SetChan(c chan string) {
 	l.logChan = c
 }
 
+//CancelChan 取消log输出通道
+func (l *Logger) CancelChan() {
+	l.logChanStat = false
+}
+
 //SetFlags 标准抬头信息
 func (l *Logger) SetFlags(flag int) {
 	l.logger.SetFlags(flag)
