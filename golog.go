@@ -29,6 +29,8 @@ type Logger struct {
 	output      string
 	level       int
 	logger      *log.Logger
+	logFile     *os.File
+	logName     string
 	logChan     chan string
 	logChanStat bool
 }
@@ -161,20 +163,26 @@ func (l *Logger) writeLog(format string, v ...interface{}) {
 		l.logChan <- o
 	}()
 	if l.output == "file" {
-		localFile := strings.TrimRight(l.dirname, "/") + "/" + time.Now().Format(l.getFormat()) + ".log"
-		localDir := path.Dir(localFile)
-		err := os.MkdirAll(localDir, 0666)
-		if err != nil {
-			log.Printf("%v\n", err)
-			return
+		logName := strings.TrimRight(l.dirname, "/") + "/" + time.Now().Format(l.getFormat())
+		logName = strings.Replace(logName, "PID", fmt.Sprintf("%d", os.Getppid()), -1)
+		if logName != l.logName {
+			localDir := path.Dir(logName)
+			err := os.MkdirAll(localDir, 0666)
+			if err != nil {
+				log.Printf("%v\n", err)
+				return
+			}
+			if l.logFile != nil {
+				l.logFile.Close()
+			}
+			l.logFile, err = os.OpenFile(logName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+			if err != nil {
+				log.Printf("%v\n", err)
+				return
+			}
+			l.logName = logName
 		}
-		file, err := os.OpenFile(localFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-		if err != nil {
-			log.Printf("%v\n", err)
-			return
-		}
-		defer file.Close()
-		l.logger.SetOutput(file)
+		l.logger.SetOutput(l.logFile)
 	}
 	_ = l.logger.Output(3, o)
 }
