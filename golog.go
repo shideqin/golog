@@ -3,6 +3,7 @@ package golog
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"path"
 	"strings"
@@ -165,8 +166,10 @@ func (l *Logger) writeLog(format string, v ...interface{}) {
 	if l.output == "file" {
 		logName := strings.TrimRight(l.dirname, "/") + "/" + time.Now().Format(l.getFormat())
 		if strings.Contains(logName, "PID") {
-			name := strings.Replace(logName, "PID", fmt.Sprintf("%d", os.Getpid()), -1)
-			logName = name
+			logName = strings.Replace(logName, "PID", fmt.Sprintf("%d", os.Getpid()), -1)
+		}
+		if strings.Contains(logName, "IP") {
+			logName = strings.Replace(logName, "IP", strings.Replace(getIpAddr(), ".", "_", -1), -1)
 		}
 		if logName != l.logName {
 			localDir := path.Dir(logName)
@@ -200,4 +203,18 @@ func (l *Logger) getFormat() string {
 	format = strings.Replace(format, "mm", "04", -1)
 	format = strings.Replace(format, "ss", "05", -1)
 	return format
+}
+
+func getIpAddr() string {
+	//通过UDP方式获取
+	local := "127.0.0.1"
+	conn, err := net.Dial("udp", "8.8.8.8:8")
+	if err != nil {
+		return local
+	}
+	defer conn.Close()
+	if err != nil {
+		return local
+	}
+	return conn.LocalAddr().(*net.UDPAddr).IP.String()
 }
