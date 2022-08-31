@@ -164,7 +164,10 @@ func (l *Logger) writeLog(format string, v ...interface{}) {
 	}()
 	if l.output == "file" {
 		logName := strings.TrimRight(l.dirname, "/") + "/" + time.Now().Format(l.getFormat())
-		logName = strings.Replace(logName, "PID", fmt.Sprintf("%d", os.Getpid()), -1)
+		if strings.Contains(logName, "PID") {
+			name := strings.Replace(logName, "PID", fmt.Sprintf("%d", os.Getpid()), -1)
+			logName = name
+		}
 		if logName != l.logName {
 			localDir := path.Dir(logName)
 			err := os.MkdirAll(localDir, 0666)
