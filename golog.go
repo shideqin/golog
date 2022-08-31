@@ -165,12 +165,15 @@ func (l *Logger) writeLog(format string, v ...interface{}) {
 	}()
 	if l.output == "file" {
 		logName := strings.TrimRight(l.dirname, "/") + "/" + time.Now().Format(l.getFormat())
+		var pid, ip string
 		if strings.Contains(logName, "PID") {
-			logName = strings.Replace(logName, "PID", fmt.Sprintf("%d", os.Getpid()), -1)
+			pid = fmt.Sprintf("%d", os.Getpid())
 		}
+		logName = strings.Replace(logName, "PID", pid, -1)
 		if strings.Contains(logName, "IP") {
-			logName = strings.Replace(logName, "IP", strings.Replace(getIpAddr(), ".", "_", -1), -1)
+			ip = strings.Replace(getIpAddr(), ".", "_", -1)
 		}
+		logName = strings.Replace(logName, "IP", ip, -1)
 		if logName != l.logName {
 			localDir := path.Dir(logName)
 			err := os.MkdirAll(localDir, 0666)
