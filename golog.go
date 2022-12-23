@@ -11,16 +11,17 @@ import (
 )
 
 const (
-	//LevelDebug debug
-	LevelDebug = iota
-	//LevelInfo info
-	LevelInfo
-	//LevelWarn warn
-	LevelWarn
-	//LevelError error
-	LevelError
-	//LevelOff off
-	//LevelOff
+	levelDebug = iota
+	levelInfo
+	levelWarn
+	levelError
+)
+
+var (
+	logDebug *log.Logger
+	logInfo  *log.Logger
+	logWarn  *log.Logger
+	logError *log.Logger
 )
 
 //Logger 结构体
@@ -29,11 +30,17 @@ type Logger struct {
 	format      string
 	output      string
 	level       int
-	logger      *log.Logger
 	logFile     *os.File
 	logName     string
 	logChan     chan string
 	logChanStat bool
+}
+
+func init() {
+	logDebug = log.New(os.Stdout, "[Debug] ", log.LstdFlags|log.Lshortfile)
+	logInfo = log.New(os.Stdout, "[Info] ", log.LstdFlags|log.Lshortfile)
+	logWarn = log.New(os.Stdout, "[Warn] ", log.LstdFlags|log.Lshortfile)
+	logError = log.New(os.Stdout, "[Error] ", log.LstdFlags|log.Lshortfile)
 }
 
 //NewLogger 实例化
@@ -54,13 +61,11 @@ func NewLogger(options map[string]interface{}) *Logger {
 	if v, ok := options["level"].(int); ok && v > 0 {
 		level = v
 	}
-	logger := log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile)
 	return &Logger{
 		dirname: dirname,
 		format:  format,
 		output:  output,
 		level:   level,
-		logger:  logger,
 	}
 }
 
@@ -80,77 +85,64 @@ func (l *Logger) CancelChan() {
 	l.logChanStat = false
 }
 
-//SetFlags 标准抬头信息
-func (l *Logger) SetFlags(flag int) {
-	l.logger.SetFlags(flag)
-}
-
 //Debug debug日志输出
 func (l *Logger) Debug(v ...interface{}) {
-	if l.level <= LevelDebug {
-		l.logger.SetPrefix("[Debug] ")
-		l.writeLog("", v...)
+	if l.level <= levelDebug {
+		l.writeLog(logDebug, "", v...)
 	}
 }
 
 //Info info日志输出
 func (l *Logger) Info(v ...interface{}) {
-	if l.level <= LevelInfo {
-		l.logger.SetPrefix("[Info] ")
-		l.writeLog("", v...)
+	if l.level <= levelInfo {
+		l.writeLog(logInfo, "", v...)
 	}
 }
 
 //Warn warn日志输出
 func (l *Logger) Warn(v ...interface{}) {
-	if l.level <= LevelWarn {
-		l.logger.SetPrefix("[Warn] ")
-		l.writeLog("", v...)
+	if l.level <= levelWarn {
+		l.writeLog(logWarn, "", v...)
 	}
 }
 
 //Error error日志输出
 func (l *Logger) Error(v ...interface{}) {
-	if l.level <= LevelError {
-		l.logger.SetPrefix("[Error] ")
-		l.writeLog("", v...)
+	if l.level <= levelError {
+		l.writeLog(logError, "", v...)
 	}
 }
 
 //Debugf debug格式化日志输出
 func (l *Logger) Debugf(format string, v ...interface{}) {
-	if l.level <= LevelDebug {
-		l.logger.SetPrefix("[Debug] ")
-		l.writeLog(format, v...)
+	if l.level <= levelDebug {
+		l.writeLog(logDebug, format, v...)
 	}
 }
 
 //Infof info格式化日志输出
 func (l *Logger) Infof(format string, v ...interface{}) {
-	if l.level <= LevelInfo {
-		l.logger.SetPrefix("[Info] ")
-		l.writeLog(format, v...)
+	if l.level <= levelInfo {
+		l.writeLog(logInfo, format, v...)
 	}
 }
 
 //Warnf warn格式化日志输出
 func (l *Logger) Warnf(format string, v ...interface{}) {
-	if l.level <= LevelWarn {
-		l.logger.SetPrefix("[Warn] ")
-		l.writeLog(format, v...)
+	if l.level <= levelWarn {
+		l.writeLog(logWarn, format, v...)
 	}
 }
 
 //Errorf error格式化日志输出
 func (l *Logger) Errorf(format string, v ...interface{}) {
-	if l.level <= LevelError {
-		l.logger.SetPrefix("[Error] ")
-		l.writeLog(format, v...)
+	if l.level <= levelError {
+		l.writeLog(logError, format, v...)
 	}
 }
 
 //writeLog 写日志操作
-func (l *Logger) writeLog(format string, v ...interface{}) {
+func (l *Logger) writeLog(logger *log.Logger, format string, v ...interface{}) {
 	o := ""
 	if format == "" {
 		o = fmt.Sprintln(v...)
@@ -191,9 +183,9 @@ func (l *Logger) writeLog(format string, v ...interface{}) {
 			}
 			l.logName = logName
 		}
-		l.logger.SetOutput(l.logFile)
+		logger.SetOutput(l.logFile)
 	}
-	_ = l.logger.Output(3, o)
+	_ = logger.Output(3, o)
 }
 
 //getFormat 日志文件名格式化
