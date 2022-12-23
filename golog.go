@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	levelDebug = iota
-	levelInfo
-	levelWarn
-	levelError
+	LevelDebug = iota
+	LevelInfo
+	LevelWarn
+	LevelError
 )
 
 var (
@@ -87,56 +87,56 @@ func (l *Logger) CancelChan() {
 
 //Debug debug日志输出
 func (l *Logger) Debug(v ...interface{}) {
-	if l.level <= levelDebug {
+	if l.level <= LevelDebug {
 		l.writeLog(logDebug, "", v...)
 	}
 }
 
 //Info info日志输出
 func (l *Logger) Info(v ...interface{}) {
-	if l.level <= levelInfo {
+	if l.level <= LevelInfo {
 		l.writeLog(logInfo, "", v...)
 	}
 }
 
 //Warn warn日志输出
 func (l *Logger) Warn(v ...interface{}) {
-	if l.level <= levelWarn {
+	if l.level <= LevelWarn {
 		l.writeLog(logWarn, "", v...)
 	}
 }
 
 //Error error日志输出
 func (l *Logger) Error(v ...interface{}) {
-	if l.level <= levelError {
+	if l.level <= LevelError {
 		l.writeLog(logError, "", v...)
 	}
 }
 
 //Debugf debug格式化日志输出
 func (l *Logger) Debugf(format string, v ...interface{}) {
-	if l.level <= levelDebug {
+	if l.level <= LevelDebug {
 		l.writeLog(logDebug, format, v...)
 	}
 }
 
 //Infof info格式化日志输出
 func (l *Logger) Infof(format string, v ...interface{}) {
-	if l.level <= levelInfo {
+	if l.level <= LevelInfo {
 		l.writeLog(logInfo, format, v...)
 	}
 }
 
 //Warnf warn格式化日志输出
 func (l *Logger) Warnf(format string, v ...interface{}) {
-	if l.level <= levelWarn {
+	if l.level <= LevelWarn {
 		l.writeLog(logWarn, format, v...)
 	}
 }
 
 //Errorf error格式化日志输出
 func (l *Logger) Errorf(format string, v ...interface{}) {
-	if l.level <= levelError {
+	if l.level <= LevelError {
 		l.writeLog(logError, format, v...)
 	}
 }
