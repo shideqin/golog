@@ -24,7 +24,7 @@ var (
 	logError *log.Logger
 )
 
-//Logger 结构体
+// Logger 结构体
 type Logger struct {
 	dirname     string
 	format      string
@@ -43,7 +43,7 @@ func init() {
 	logError = log.New(os.Stdout, "[Error] ", log.LstdFlags|log.Lshortfile)
 }
 
-//NewLogger 实例化
+// NewLogger 实例化
 func NewLogger(options map[string]interface{}) *Logger {
 	var dirname = "."
 	if v, ok := options["dirname"].(string); ok && v != "" {
@@ -69,80 +69,83 @@ func NewLogger(options map[string]interface{}) *Logger {
 	}
 }
 
-//SetLevel 设置级别
+// SetLevel 设置级别
 func (l *Logger) SetLevel(level int) {
 	l.level = level
 }
 
-//SetChan 设置log输出通道
+// SetChan 设置log输出通道
 func (l *Logger) SetChan(c chan string) {
 	l.logChanStat = true
 	l.logChan = c
 }
 
-//CancelChan 取消log输出通道
+// CancelChan 取消log输出通道
 func (l *Logger) CancelChan() {
 	l.logChanStat = false
 }
 
-//Debug debug日志输出
+// Debug debug日志输出
 func (l *Logger) Debug(v ...interface{}) {
 	if l.level <= LevelDebug {
 		l.writeLog(logDebug, "", v...)
 	}
 }
 
-//Info info日志输出
+// Info info日志输出
 func (l *Logger) Info(v ...interface{}) {
 	if l.level <= LevelInfo {
 		l.writeLog(logInfo, "", v...)
 	}
 }
 
-//Warn warn日志输出
+// Warn warn日志输出
 func (l *Logger) Warn(v ...interface{}) {
 	if l.level <= LevelWarn {
 		l.writeLog(logWarn, "", v...)
 	}
 }
 
-//Error error日志输出
+// Error error日志输出
 func (l *Logger) Error(v ...interface{}) {
 	if l.level <= LevelError {
 		l.writeLog(logError, "", v...)
 	}
 }
 
-//Debugf debug格式化日志输出
+// Debugf debug格式化日志输出
 func (l *Logger) Debugf(format string, v ...interface{}) {
 	if l.level <= LevelDebug {
 		l.writeLog(logDebug, format, v...)
 	}
 }
 
-//Infof info格式化日志输出
+// Infof info格式化日志输出
 func (l *Logger) Infof(format string, v ...interface{}) {
 	if l.level <= LevelInfo {
 		l.writeLog(logInfo, format, v...)
 	}
 }
 
-//Warnf warn格式化日志输出
+// Warnf warn格式化日志输出
 func (l *Logger) Warnf(format string, v ...interface{}) {
 	if l.level <= LevelWarn {
 		l.writeLog(logWarn, format, v...)
 	}
 }
 
-//Errorf error格式化日志输出
+// Errorf error格式化日志输出
 func (l *Logger) Errorf(format string, v ...interface{}) {
 	if l.level <= LevelError {
 		l.writeLog(logError, format, v...)
 	}
 }
 
-//writeLog 写日志操作
+// writeLog 写日志操作
 func (l *Logger) writeLog(logger *log.Logger, format string, v ...interface{}) {
+	if l.output == "null" {
+		return
+	}
 	o := ""
 	if format == "" {
 		o = fmt.Sprintln(v...)
@@ -188,7 +191,7 @@ func (l *Logger) writeLog(logger *log.Logger, format string, v ...interface{}) {
 	_ = logger.Output(3, o)
 }
 
-//getFormat 日志文件名格式化
+// getFormat 日志文件名格式化
 func (l *Logger) getFormat() string {
 	format := l.format
 	format = strings.Replace(format, "yyyy", "2006", -1)

@@ -7,6 +7,6 @@ import (
 )
 
 func main() {
-	log := golog.NewLogger(map[string]interface{}{"dirname": "./log/", "output": "file", "format": "yyyyMMddHH"})
+	log := golog.NewLogger(map[string]interface{}{"dirname": "./log/", "output": "null", "format": "yyyyMMddHH"})
 	fmt.Println(log)
 }

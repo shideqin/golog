@@ -1,3 +1,3 @@
 module github.com/shideqin/golog
 
-go 1.14
+go 1.20
